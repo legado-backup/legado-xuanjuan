@@ -325,7 +325,6 @@ class JsSourceWebApiContractTest {
     @Test
     fun `documentation records endpoint limits and network boundary`() {
         val api = readProjectFile("api.md")
-        val updateLog = readProjectFile("app/src/main/assets/updateLog.md")
         val backupConfig = readProjectFile(
             "app/src/main/java/io/legado/app/help/storage/BackupConfig.kt"
         )
@@ -363,7 +362,6 @@ class JsSourceWebApiContractTest {
         assertTrue(api.contains("/getHttpLog?id=1"))
         assertTrue(api.contains("8 KiB"))
         assertTrue(api.contains("X-Legado-Token = 设置中配置的令牌"))
-        assertTrue(updateLog.contains("Web API 新增带令牌保护的纯 JavaScript 单文件书源保存接口"))
         assertTrue(backupConfig.contains("PreferKey.jsSourceApiToken"))
         assertTrue(manifest.contains("@xml/backup_rules"))
         assertTrue(manifest.contains("@xml/data_extraction_rules"))

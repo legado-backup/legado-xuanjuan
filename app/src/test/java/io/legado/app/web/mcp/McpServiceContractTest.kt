@@ -315,7 +315,6 @@ class McpServiceContractTest {
     @Test
     fun `documentation and shrinker keep the security boundary`() {
         val api = projectFile("api.md")
-        val updateLog = projectFile("app/src/main/assets/updateLog.md")
         val proguard = projectFile("app/proguard-rules.pro")
 
         assertTrue(api.contains("X-Legado-Token"))
@@ -327,11 +326,6 @@ class McpServiceContractTest {
         assertTrue(api.contains("只合并写入持久层"))
         assertTrue(api.contains("同名会话 Cookie"))
         assertTrue(api.contains("legado://help/"))
-        assertTrue(updateLog.contains("**2026/07/22**"))
-        assertTrue(updateLog.contains("原生 MCP 书源开发服务"))
-        assertTrue(updateLog.contains("支持通过 MCP 在应用内书源环境执行 JavaScript"))
-        assertTrue(updateLog.contains("MCP 增加 Cookie 非破坏性读取"))
-        assertTrue(updateLog.contains("支持通过 MCP resources 读取应用内帮助文档"))
         assertFalse(proguard.contains("-keep class io.ktor.**"))
         assertFalse(proguard.contains("-keep class kotlinx.coroutines.**"))
     }

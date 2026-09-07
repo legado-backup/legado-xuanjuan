@@ -17,11 +17,11 @@ apply from: 'download.gradle'
 def name = "legado"
 def version = project.findProperty("NOVEL_VERSION_NAME")
         ?: System.getenv("NOVEL_VERSION_NAME")
-        ?: "0.1.7"
+        ?: "0.1.8"
 def versionCodeValue = Integer.parseInt(
         project.findProperty("NOVEL_VERSION_CODE")?.toString()
                 ?: System.getenv("NOVEL_VERSION_CODE")
-                ?: "41007"
+                ?: "41008"
 )
 def releaseStoreFile = project.findProperty("RELEASE_STORE_FILE")
         ?: System.getenv("RELEASE_STORE_FILE")
@@ -169,6 +169,12 @@ android {
                 'kotlin/**/*.kotlin_builtins'
         ])
         jniLibs {
+            // sherpa-onnx Android/Kotlin uses JNI directly. The C and C++ API
+            // shared libraries are not used by the app and only inflate the APK.
+            excludes += [
+                    '**/libsherpa-onnx-c-api.so',
+                    '**/libsherpa-onnx-cxx-api.so'
+            ]
             // These dependencies already ship stripped; skip redundant strip attempts.
             keepDebugSymbols += [
                     '**/libandroidx.graphics.path.so',
@@ -328,6 +334,9 @@ dependencies {
 
     //压缩解压
     implementation libs.libarchive
+
+    // 玄卷离线高级朗读（Kokoro 等 sherpa-onnx TTS 模型）
+    implementation libs.sherpa.onnx
 
     //apache
     implementation(libs.commons.text)

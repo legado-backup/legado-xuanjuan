@@ -101,6 +101,22 @@ internal fun resolveReplacePreviewPosition(
     return previewTitle + previewBodyPosition
 }
 
+internal data class ContentRecoveryState(
+    val chapterIndex: Int,
+    val message: String,
+    val hasCachedContent: Boolean,
+    val canChangeSource: Boolean,
+)
+
+internal fun resolveContentFailureReason(content: String): String? {
+    val prefix = when {
+        content.startsWith("获取正文失败") -> "获取正文失败"
+        content.startsWith("加载正文失败") -> "加载正文失败"
+        else -> return null
+    }
+    return content.removePrefix(prefix).trim()
+}
+
 
 @Suppress("MemberVisibilityCanBePrivate")
 object ReadBook : CoroutineScope by MainScope() {
@@ -144,6 +160,10 @@ object ReadBook : CoroutineScope by MainScope() {
     var nextTextChapter: TextChapter? = null
     var bookSource: BookSource? = null
     var msg: String? = null
+    @Volatile
+    internal var contentRecoveryState: ContentRecoveryState? = null
+        private set
+    private val contentFailureReasons = ConcurrentHashMap<Int, String>()
     private val loadingChapters = arrayListOf<Int>()
     private val readRecord = ReadRecord()
     private val chapterLoadingJobs = ConcurrentHashMap<Int, Coroutine<*>>()
@@ -317,6 +337,15 @@ object ReadBook : CoroutineScope by MainScope() {
         )
         if (cacheResult) textChapter.highlightText = text
         return text
+    }
+
+    /** Plain body text of the current laid-out chapter for fully local TTS character discovery. */
+    fun currentChapterPlainText(): String? {
+        val currentBook = book ?: return null
+        val chapter = curTextChapter?.takeIf {
+            it.isCompleted && it.chapter.bookUrl == currentBook.bookUrl
+        } ?: return null
+        return chapterText(chapter).drop(chapter.layoutTitleLength.coerceAtLeast(0))
     }
 
     private fun isActiveTextChapter(textChapter: TextChapter): Boolean {
@@ -549,6 +578,8 @@ object ReadBook : CoroutineScope by MainScope() {
         clearExpiredChapterLoadingJob(true)
         pendingHighlightJump = null
         pendingHighlightAnchor = null
+        contentRecoveryState = null
+        contentFailureReasons.clear()
         invalidateHighlightRuleMatches()
         prevTextChapter = null
         curTextChapter = null
@@ -706,6 +737,7 @@ object ReadBook : CoroutineScope by MainScope() {
             prevTextChapter = curTextChapter
             curTextChapter = nextTextChapter
             nextTextChapter = null
+            activateCurrentContentRecoveryState()
             if (curTextChapter == null) {
                 AppLog.putDebug("moveToNextChapter-章节未加载,开始加载")
                 if (upContentInPlace) callBack?.upContent()
@@ -748,6 +780,7 @@ object ReadBook : CoroutineScope by MainScope() {
             prevTextChapter = curTextChapter
             curTextChapter = nextTextChapter
             nextTextChapter = null
+            activateCurrentContentRecoveryState()
             if (curTextChapter == null) {
                 AppLog.putDebug("moveToNextChapter-章节未加载,开始加载")
                 if (upContentInPlace) callBack?.upContentAwait()
@@ -786,6 +819,7 @@ object ReadBook : CoroutineScope by MainScope() {
             nextTextChapter = curTextChapter
             curTextChapter = prevTextChapter
             prevTextChapter = null
+            activateCurrentContentRecoveryState()
             if (curTextChapter == null) {
                 if (upContentInPlace) callBack?.upContent()
                 loadContent(durChapterIndex, upContent, resetPageOffset = false)
@@ -1016,6 +1050,91 @@ object ReadBook : CoroutineScope by MainScope() {
         }
         if (prevTextChapter == null) {
             loadContent(durChapterIndex - 1)
+        }
+    }
+
+    fun retryCurrentContent() {
+        contentRecoveryState = null
+        contentFailureReasons.remove(durChapterIndex)
+        curTextChapter?.cancelLayout()
+        curTextChapter = null
+        callBack?.upContent(resetPageOffset = false)
+        loadContent(
+            durChapterIndex,
+            resetPageOffset = false,
+            readPositionVersion = callBack?.readPositionVersion(),
+        )
+    }
+
+    suspend fun useCachedCurrentContent(): Boolean {
+        val currentBook = book ?: return false
+        val chapter = withContext(IO) {
+            appDb.bookChapterDao.getChapter(currentBook.bookUrl, durChapterIndex)
+        } ?: return false
+        val cachedContent = withContext(IO) {
+            usableCachedContent(currentBook, chapter)
+        } ?: return false
+        withContext(Main) {
+            curTextChapter?.cancelLayout()
+            curTextChapter = null
+            contentRecoveryState = null
+            contentFailureReasons.remove(durChapterIndex)
+        }
+        contentLoadFinish(
+            currentBook,
+            chapter,
+            cachedContent,
+            resetPageOffset = false,
+        )
+        return true
+    }
+
+    private fun usableCachedContent(book: Book, chapter: BookChapter): String? {
+        return BookHelp.getContent(book, chapter)
+            ?.takeIf { resolveContentFailureReason(it) == null }
+    }
+
+    private fun updateContentRecoveryState(
+        book: Book,
+        chapter: BookChapter,
+        content: String,
+    ) {
+        val failureReason = resolveContentFailureReason(content)
+        if (failureReason == null) {
+            contentFailureReasons.remove(chapter.index)
+        } else {
+            contentFailureReasons[chapter.index] = failureReason
+        }
+        if (chapter.index != durChapterIndex) return
+        contentRecoveryState = createContentRecoveryState(book, chapter, failureReason)
+    }
+
+    private fun activateCurrentContentRecoveryState() {
+        val currentBook = book ?: run {
+            contentRecoveryState = null
+            return
+        }
+        val chapter = curTextChapter?.chapter?.takeIf { it.index == durChapterIndex }
+        val failureReason = contentFailureReasons[durChapterIndex]
+        contentRecoveryState = if (chapter != null) {
+            createContentRecoveryState(currentBook, chapter, failureReason)
+        } else {
+            null
+        }
+    }
+
+    private fun createContentRecoveryState(
+        book: Book,
+        chapter: BookChapter,
+        failureReason: String?,
+    ): ContentRecoveryState? {
+        return failureReason?.let {
+            ContentRecoveryState(
+                chapterIndex = chapter.index,
+                message = it,
+                hasCachedContent = usableCachedContent(book, chapter) != null,
+                canChangeSource = !book.isLocal,
+            )
         }
     }
 
@@ -1263,6 +1382,7 @@ object ReadBook : CoroutineScope by MainScope() {
         if (canceled || chapter.index !in durChapterIndex - 1..durChapterIndex + 1) {
             return
         }
+        updateContentRecoveryState(book, chapter, content)
         val shouldResetPageOffset = resetPageOffset &&
             shouldApplyReadPositionReset(readPositionVersion)
         chapterLoadingJobs[chapter.index]?.cancel()
@@ -1398,6 +1518,7 @@ object ReadBook : CoroutineScope by MainScope() {
         if (chapter.index !in durChapterIndex - 1..durChapterIndex + 1) {
             return
         }
+        updateContentRecoveryState(book, chapter, content)
         val shouldResetPageOffset = resetPageOffset &&
             shouldApplyReadPositionReset(readPositionVersion)
         kotlin.runCatching {
@@ -1795,6 +1916,8 @@ object ReadBook : CoroutineScope by MainScope() {
 
     private fun releaseAndCancel() {
         msg = null
+        contentRecoveryState = null
+        contentFailureReasons.clear()
         preDownloadTask?.cancel()
         invalidateHighlightRuleMatches()
         downloadScope.coroutineContext.cancelChildren()

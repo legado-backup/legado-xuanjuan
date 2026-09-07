@@ -41,8 +41,11 @@ class DefaultBookSourceUpdateTest {
             "https://m.kudushu.org",
             "http://wap.wangshuge.la",
             "http://www.qudushu.com",
+            "https://www.bounceup.net",
+            "https://www.conglianhao.com",
+            "https://www.greatlyname.com",
         )
-        assertEquals(37, NOVEL_HELPER_BUILTIN_SOURCE_URLS.size)
+        assertEquals(40, NOVEL_HELPER_BUILTIN_SOURCE_URLS.size)
         assertEquals(
             NOVEL_HELPER_BUILTIN_SOURCE_URLS.size,
             NOVEL_HELPER_BUILTIN_SOURCE_URLS.toSet().size,

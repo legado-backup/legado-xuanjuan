@@ -19,4 +19,13 @@
     <color name="xuanjuan_crimson">#7E2925</color>
     <color name="xuanjuan_text_primary">#F2E8D8</color>
     <color name="xuanjuan_text_secondary">#B9A895</color>
+    <color name="xuanjuan_read_aloud_surface">#2D231C</color>
+    <color name="xuanjuan_read_aloud_card">#3C2E24</color>
+    <color name="xuanjuan_read_aloud_card_high">#49372A</color>
+    <color name="xuanjuan_read_aloud_stroke">#A97E45</color>
+    <color name="xuanjuan_read_aloud_gold">#F1CB82</color>
+    <color name="xuanjuan_read_aloud_gold_dim">#665D4327</color>
+    <color name="xuanjuan_read_aloud_text_primary">#FFF8EA</color>
+    <color name="xuanjuan_read_aloud_text_secondary">#E8D4B6</color>
+    <color name="xuanjuan_read_aloud_action_icon">#2A1C10</color>
 </resources>

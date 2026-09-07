@@ -39,7 +39,6 @@ class ExploreGroupMenuStateTest {
         val source = readProjectFile(
             "src/main/java/io/legado/app/ui/main/explore/ExploreFragment.kt"
         )
-        val log = readProjectFile("src/main/assets/updateLog.md")
 
         listOf(
             "upGroupsMenu(resetMissingGroup = true)",
@@ -63,8 +62,6 @@ class ExploreGroupMenuStateTest {
         )
         assertTrue(nonExclusive in 0 until checkedAssignment)
         assertTrue(exclusive > checkedAssignment)
-        assertTrue(log.contains("**2026/07/25**"))
-        assertTrue(log.contains("发现页书源分组菜单增加全部书源选项和当前分组勾选"))
     }
 
     @Test

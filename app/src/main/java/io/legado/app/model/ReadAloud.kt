@@ -10,9 +10,12 @@ import io.legado.app.constant.IntentAction
 import io.legado.app.data.appDb
 import io.legado.app.data.entities.HttpTTS
 import io.legado.app.help.config.AppConfig
+import io.legado.app.help.tts.FastVitsOfflineTts
+import io.legado.app.help.tts.KokoroOfflineTts
 import io.legado.app.lib.dialogs.SelectItem
 import io.legado.app.service.BaseReadAloudService
 import io.legado.app.service.HttpReadAloudService
+import io.legado.app.service.OfflineReadAloudService
 import io.legado.app.service.TTSReadAloudService
 import io.legado.app.utils.GSON
 import io.legado.app.utils.LogUtils
@@ -64,6 +67,11 @@ object ReadAloud {
         if (ttsEngine.isNullOrBlank()) {
             return TTSReadAloudService::class.java
         }
+        if (ttsEngine == KokoroOfflineTts.ENGINE_TOKEN ||
+            ttsEngine == FastVitsOfflineTts.ENGINE_TOKEN
+        ) {
+            return OfflineReadAloudService::class.java
+        }
         ttsEngine.toLongOrNull()?.let { id ->
             httpTTS = appDb.httpTTSDao.get(id)
             if (httpTTS != null) {
@@ -87,6 +95,12 @@ object ReadAloud {
     ) {
         if (!BaseReadAloudService.isRun) {
             restoreReadAloudFollow()
+        }
+        if (ttsEngine == KokoroOfflineTts.ENGINE_TOKEN && KokoroOfflineTts.isInstalled(context)) {
+            KokoroOfflineTts.prewarm(context)
+        }
+        if (ttsEngine == FastVitsOfflineTts.ENGINE_TOKEN && FastVitsOfflineTts.isInstalled(context)) {
+            FastVitsOfflineTts.prewarm(context)
         }
         val intent = Intent(context, aloudClass)
         intent.action = IntentAction.play
@@ -200,6 +214,12 @@ object ReadAloud {
     }
 
     fun getEngineName(context: Context): String {
+        if (ttsEngine == KokoroOfflineTts.ENGINE_TOKEN) {
+            return context.getString(R.string.kokoro_offline_engine)
+        }
+        if (ttsEngine == FastVitsOfflineTts.ENGINE_TOKEN) {
+            return context.getString(R.string.fast_vits_offline_engine)
+        }
         val systemTtsName = context.getString(R.string.system_tts)
         return resolveReadAloudEngineName(ttsEngine, systemTtsName) { id ->
             appDb.httpTTSDao.getName(id)

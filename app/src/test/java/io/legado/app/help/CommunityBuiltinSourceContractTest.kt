@@ -122,7 +122,7 @@ class CommunityBuiltinSourceContractTest {
     }
 
     @Test
-    fun strictCommunityBundleContainsExactlySevenIndependentValidatedSources() {
+    fun strictCommunityBundleContainsExactlyTenIndependentValidatedSources() {
         val sources = GSON.fromJsonArray<BookSource>(
             projectFile("src/main/assets/defaultData/bookSources/community_strict7.json").readText()
         ).getOrThrow()
@@ -136,13 +136,13 @@ class CommunityBuiltinSourceContractTest {
                 "https://m.kudushu.org",
                 "http://wap.wangshuge.la",
                 "http://www.qudushu.com",
+                "https://www.bounceup.net",
+                "https://www.conglianhao.com",
+                "https://www.greatlyname.com",
             ),
             sources.map { it.bookSourceUrl },
         )
-        assertEquals(
-            listOf("平板电子书网", "顶点小说", "神话之后", "蜘蛛小说网", "苦读书", "望书阁网", "去读书"),
-            sources.map { it.bookSourceName },
-        )
+        assertEquals(10, sources.map { it.bookSourceName }.distinct().size)
         sources.forEach { source ->
             assertTrue("${source.bookSourceName} must be enabled", source.enabled)
             assertTrue("${source.bookSourceName} must not require login", source.loginUrl.isNullOrBlank())

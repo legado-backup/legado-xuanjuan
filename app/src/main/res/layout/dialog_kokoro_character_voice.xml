@@ -1,0 +1,312 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/root_view"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/xuanjuan_read_aloud_bg"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="18dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/kokoro_character_voice_title"
+            android:textColor="@color/xuanjuan_read_aloud_text_primary"
+            android:textSize="21sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tv_character_summary"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:text="@string/kokoro_character_voice_summary"
+            android:textColor="@color/xuanjuan_read_aloud_text_secondary"
+            android:textSize="13sp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/xuanjuan_read_aloud_card"
+            android:orientation="vertical"
+            android:padding="12dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/kokoro_character_detected"
+                android:textColor="@color/xuanjuan_read_aloud_gold"
+                android:textSize="15sp"
+                android:textStyle="bold" />
+
+            <HorizontalScrollView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:fillViewport="false"
+                android:scrollbars="none">
+
+                <LinearLayout
+                    android:id="@+id/character_tabs_detected"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal" />
+            </HorizontalScrollView>
+
+            <TextView
+                android:id="@+id/tv_empty"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="center"
+                android:padding="12dp"
+                android:text="@string/kokoro_character_empty"
+                android:textColor="@color/xuanjuan_read_aloud_text_secondary"
+                android:textSize="13sp"
+                android:visibility="gone" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:text="@string/kokoro_character_saved_title"
+                android:textColor="@color/xuanjuan_read_aloud_gold"
+                android:textSize="15sp"
+                android:textStyle="bold" />
+
+            <HorizontalScrollView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:fillViewport="false"
+                android:scrollbars="none">
+
+                <LinearLayout
+                    android:id="@+id/character_tabs_saved"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal" />
+            </HorizontalScrollView>
+
+            <TextView
+                android:id="@+id/tv_saved_empty"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:padding="8dp"
+                android:text="@string/kokoro_character_saved_empty"
+                android:textColor="@color/xuanjuan_read_aloud_text_secondary"
+                android:textSize="13sp"
+                android:visibility="gone" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:orientation="horizontal">
+
+                <EditText
+                    android:id="@+id/et_character_name"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/selector_read_aloud_speed"
+                    android:hint="@string/kokoro_character_add_hint"
+                    android:inputType="textPersonName"
+                    android:maxLength="6"
+                    android:paddingHorizontal="12dp"
+                    android:singleLine="true"
+                    android:textColor="@color/xuanjuan_read_aloud_text_primary"
+                    android:textColorHint="@color/xuanjuan_read_aloud_text_secondary" />
+
+                <TextView
+                    android:id="@+id/tv_character_add"
+                    android:layout_width="72dp"
+                    android:layout_height="48dp"
+                    android:layout_marginStart="8dp"
+                    android:background="@drawable/xuanjuan_read_aloud_action_bg"
+                    android:gravity="center"
+                    android:text="@string/kokoro_character_add"
+                    android:textColor="@color/xuanjuan_read_aloud_action_icon"
+                    android:textStyle="bold" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/character_editor"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/xuanjuan_read_aloud_card"
+            android:orientation="vertical"
+            android:padding="12dp">
+
+            <TextView
+                android:id="@+id/tv_selected_character"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/xuanjuan_read_aloud_text_primary"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tv_character_hint"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:textColor="@color/xuanjuan_read_aloud_text_secondary"
+                android:textSize="12sp" />
+
+            <TextView
+                android:id="@+id/tv_character_current_voice"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:textColor="@color/xuanjuan_read_aloud_gold"
+                android:textSize="15sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tv_character_preview_quote"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:textColor="@color/xuanjuan_read_aloud_text_secondary"
+                android:textSize="13sp"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/tv_character_preset_1"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/selector_read_aloud_speed"
+                android:gravity="center_vertical"
+                android:paddingHorizontal="14dp"
+                android:textColor="@color/xuanjuan_read_aloud_text_primary"
+                android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/tv_character_preset_2"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_marginTop="6dp"
+                android:background="@drawable/selector_read_aloud_speed"
+                android:gravity="center_vertical"
+                android:paddingHorizontal="14dp"
+                android:textColor="@color/xuanjuan_read_aloud_text_primary"
+                android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/tv_character_preset_3"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_marginTop="6dp"
+                android:background="@drawable/selector_read_aloud_speed"
+                android:gravity="center_vertical"
+                android:paddingHorizontal="14dp"
+                android:textColor="@color/xuanjuan_read_aloud_text_primary"
+                android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/tv_character_preset_4"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_marginTop="6dp"
+                android:background="@drawable/selector_read_aloud_speed"
+                android:gravity="center_vertical"
+                android:paddingHorizontal="14dp"
+                android:textColor="@color/xuanjuan_read_aloud_text_primary"
+                android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/tv_character_preview"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/xuanjuan_read_aloud_action_bg"
+                android:gravity="center"
+                android:text="@string/kokoro_voice_preview"
+                android:textColor="@color/xuanjuan_read_aloud_action_icon"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tv_character_advanced_toggle"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="12dp"
+                android:gravity="center_vertical"
+                android:text="@string/kokoro_voice_advanced_expand"
+                android:textColor="@color/xuanjuan_read_aloud_text_primary"
+                android:textStyle="bold" />
+
+            <LinearLayout
+                android:id="@+id/ll_character_advanced_detail"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <TextView
+                    android:id="@+id/tv_character_advanced"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/xuanjuan_read_aloud_gold"
+                    android:textStyle="bold" />
+
+                <SeekBar
+                    android:id="@+id/seek_character_advanced"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:progressTint="@color/xuanjuan_read_aloud_gold"
+                    android:thumbTint="@color/xuanjuan_read_aloud_gold" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/tv_character_reset"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:background="@drawable/selector_read_aloud_speed"
+                android:gravity="center"
+                android:text="@string/kokoro_character_reset"
+                android:textColor="@color/xuanjuan_read_aloud_text_primary" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/tv_character_cancel"
+                android:layout_width="0dp"
+                android:layout_height="52dp"
+                android:layout_marginEnd="5dp"
+                android:layout_weight="1"
+                android:background="@drawable/selector_read_aloud_speed"
+                android:gravity="center"
+                android:text="@string/cancel"
+                android:textColor="@color/xuanjuan_read_aloud_text_primary"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tv_character_save"
+                android:layout_width="0dp"
+                android:layout_height="52dp"
+                android:layout_marginStart="5dp"
+                android:layout_weight="1"
+                android:background="@drawable/xuanjuan_read_aloud_action_bg"
+                android:gravity="center"
+                android:text="@string/action_save"
+                android:textColor="@color/xuanjuan_read_aloud_action_icon"
+                android:textStyle="bold" />
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>

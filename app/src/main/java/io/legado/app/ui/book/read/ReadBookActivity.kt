@@ -358,6 +358,21 @@ class ReadBookActivity : BaseReadBookActivity(),
         binding.readAloudFloatBarContainer.llReadFromHere.setOnClickListener {
             ReadBook.readAloud()
         }
+        binding.btnReadRetry.setOnClickListener {
+            ReadBook.retryCurrentContent()
+            updateReadRecovery()
+        }
+        binding.btnReadUseCache.setOnClickListener {
+            lifecycleScope.launch {
+                if (!ReadBook.useCachedCurrentContent()) {
+                    toastOnUi(R.string.xuanjuan_reader_cache_unavailable)
+                    updateReadRecovery()
+                }
+            }
+        }
+        binding.btnReadChangeSource.setOnClickListener {
+            showBookChangeSource()
+        }
         window.setBackgroundDrawable(null)
         upScreenTimeOut()
         ReadBook.register(this)
@@ -1448,6 +1463,7 @@ class ReadBookActivity : BaseReadBookActivity(),
             }
             loadStates = true
             loadReviewSummaryIfNeeded()
+            updateReadRecovery()
         }
     }
 
@@ -1469,6 +1485,7 @@ class ReadBookActivity : BaseReadBookActivity(),
             upBookmarkIndicator()
             if (relativePosition == 0) {
                 upSeekBarProgress()
+                updateReadRecovery()
             }
             loadStates = false
             loadReviewSummaryIfNeeded()
@@ -1498,6 +1515,7 @@ class ReadBookActivity : BaseReadBookActivity(),
         upBookmarkIndicator()
         if (relativePosition == 0) {
             upSeekBarProgress()
+            updateReadRecovery()
         }
         loadStates = false
         loadReviewSummaryIfNeeded()
@@ -1533,6 +1551,8 @@ class ReadBookActivity : BaseReadBookActivity(),
         handler.post {
             upBookmarkIndicator()
             upSeekBarProgress()
+            binding.readMenu.upSeekBar()
+            updateReadRecovery()
         }
         executor.execute {
             startBackupJob()
@@ -1557,6 +1577,18 @@ class ReadBookActivity : BaseReadBookActivity(),
             else /* chapter */ -> ReadBook.durChapterIndex
         }
         binding.readMenu.setSeekPage(progress)
+    }
+
+    private fun updateReadRecovery() = binding.run {
+        val state = ReadBook.contentRecoveryState
+            ?.takeIf { it.chapterIndex == ReadBook.durChapterIndex }
+        readRecovery.isVisible = state != null
+        if (state == null) return@run
+        tvReadRecoveryMessage.text = state.message.ifBlank {
+            getString(R.string.xuanjuan_reader_recovery_default_detail)
+        }
+        btnReadUseCache.isVisible = state.hasCachedContent
+        btnReadChangeSource.isVisible = state.canChangeSource
     }
 
     /**

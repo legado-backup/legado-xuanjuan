@@ -16,6 +16,8 @@ object NotificationId {
     const val VideoPlayService = 108
     const val AudioCacheService = 109
     const val McpService = 110
+    const val KokoroModelInstallService = 111
+    const val FastVitsModelInstallService = 112
     const val AutoTaskNotifyBase = 30000
     const val AutoTaskBookUpdateBase = 50000
     const val Download = 10000

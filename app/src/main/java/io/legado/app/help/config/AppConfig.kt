@@ -402,11 +402,28 @@ object AppConfig : SharedPreferences.OnSharedPreferenceChangeListener {
         get() = appCtx.getPrefBoolean(PreferKey.noAnimScrollPage, false)
 
     const val defaultSpeechRate = 5
+    const val defaultKokoroSpeechRate = 10
+    const val minTtsSpeechRate = 0
+    const val maxTtsSpeechRate = 45
 
     var ttsSpeechRate: Int
         get() = appCtx.getPrefInt(PreferKey.ttsSpeechRate, defaultSpeechRate)
+            .coerceIn(minTtsSpeechRate, maxTtsSpeechRate)
         set(value) {
-            appCtx.putPrefInt(PreferKey.ttsSpeechRate, value)
+            appCtx.putPrefInt(
+                PreferKey.ttsSpeechRate,
+                value.coerceIn(minTtsSpeechRate, maxTtsSpeechRate)
+            )
+        }
+
+    var kokoroSpeechRate: Int
+        get() = appCtx.getPrefInt(PreferKey.kokoroSpeechRate, defaultKokoroSpeechRate)
+            .coerceIn(minTtsSpeechRate, maxTtsSpeechRate)
+        set(value) {
+            appCtx.putPrefInt(
+                PreferKey.kokoroSpeechRate,
+                value.coerceIn(minTtsSpeechRate, maxTtsSpeechRate)
+            )
         }
 
     var ttsTimer: Int
@@ -514,6 +531,22 @@ object AppConfig : SharedPreferences.OnSharedPreferenceChangeListener {
         set(value) {
             appCtx.putPrefString(PreferKey.ttsEngine, value)
         }
+
+    var kokoroNarratorSpeaker: Int
+        get() = appCtx.getPrefInt(PreferKey.kokoroNarratorSpeaker, 58).coerceIn(3, 102)
+        set(value) = appCtx.putPrefInt(PreferKey.kokoroNarratorSpeaker, value.coerceIn(3, 102))
+
+    var kokoroMaleSpeaker: Int
+        get() = appCtx.getPrefInt(PreferKey.kokoroMaleSpeaker, 60).coerceIn(58, 102)
+        set(value) = appCtx.putPrefInt(PreferKey.kokoroMaleSpeaker, value.coerceIn(58, 102))
+
+    var kokoroFemaleSpeaker: Int
+        get() = appCtx.getPrefInt(PreferKey.kokoroFemaleSpeaker, 3).coerceIn(3, 57)
+        set(value) = appCtx.putPrefInt(PreferKey.kokoroFemaleSpeaker, value.coerceIn(3, 57))
+
+    var kokoroUnknownSpeaker: Int
+        get() = appCtx.getPrefInt(PreferKey.kokoroUnknownSpeaker, 5).coerceIn(3, 102)
+        set(value) = appCtx.putPrefInt(PreferKey.kokoroUnknownSpeaker, value.coerceIn(3, 102))
 
     var webPort: Int
         get() = appCtx.getPrefInt(PreferKey.webPort, 1122)

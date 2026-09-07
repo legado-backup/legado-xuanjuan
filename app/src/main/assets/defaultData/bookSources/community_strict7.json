@@ -503,5 +503,123 @@
     "searchUrl": "http://www.qudushu.com/modules/article/search.php?q={{key}}",
     "variableComment": "",
     "weight": 2
+  },
+  {
+    "bookSourceName": "猪八戒小说网",
+    "bookSourceGroup": "社区严格实测",
+    "bookSourceType": 0,
+    "bookSourceUrl": "https://www.bounceup.net",
+    "enabled": true,
+    "enabledExplore": false,
+    "enabledCookieJar": false,
+    "loginUrl": "",
+    "header": "{\"User-Agent\":\"Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 Chrome/136.0 Mobile Safari/537.36\"}",
+    "searchUrl": "/search,{'method':'post','body':'searchkey={{key}}'}",
+    "bookSourceComment": "2026-09-07 以《腐朽世界》（滚开）严格实测：搜索、详情、真实封面、608章目录、首章及约75%后段正文均通过。",
+    "ruleSearch": {
+      "bookList": ".book-coverlist",
+      "name": ".name@a@text",
+      "author": ".author@text",
+      "bookUrl": ".name@a@href",
+      "coverUrl": ".cover@img@src",
+      "intro": ".intro@text",
+      "kind": ".status@span.0@text",
+      "wordCount": ".status@span.2@text"
+    },
+    "ruleBookInfo": {
+      "name": "[property=og:novel:book_name]@content||[property=og:title]@content",
+      "author": "[property=og:novel:author]@content",
+      "coverUrl": "[property=og:image]@content",
+      "intro": "[property=og:description]@content",
+      "kind": "[property=og:novel:category]@content",
+      "tocUrl": "class.panel-footer@a@href"
+    },
+    "ruleToc": {
+      "chapterList": ".panel-chapterlist@dd@a",
+      "chapterName": "text",
+      "chapterUrl": "href",
+      "nextTocUrl": "text.下一页@href"
+    },
+    "ruleContent": {
+      "content": "<js>\n(function(){\n  var html=String(result||'');\n  function decodeJs(s){\n    try{return eval('\"'+s+'\"');}catch(e){return s.replace(/\\\\\\//g,'/').replace(/\\\\u002b/ig,'+');}\n  }\n  var re=/\\.html\\(x\\(\"((?:\\\\.|[^\"])*)\"\\s*,\\s*\"((?:\\\\.|[^\"])*)\"\\s*,\\s*\"((?:\\\\.|[^\"])*)\"\\)\\)/g;\n  var m,best='',bestP=-1;\n  while((m=re.exec(html))!==null){\n    try{\n      var enc=decodeJs(m[1]);\n      var key=decodeJs(m[2]);\n      var iv=decodeJs(m[3]);\n      var plain=CryptoJS.AES.decrypt(\n        {ciphertext:CryptoJS.enc.Base64.parse(enc)},\n        CryptoJS.enc.Utf8.parse(key),\n        {iv:CryptoJS.enc.Base64.parse(iv),mode:CryptoJS.mode.CBC,padding:CryptoJS.pad.ZeroPadding}\n      ).toString(CryptoJS.enc.Utf8);\n      var p=(plain.match(/<p\\b/gi)||[]).length;\n      if(p>bestP||(p===bestP&&plain.length>best.length)){best=plain;bestP=p;}\n    }catch(e){}\n  }\n  return best;\n})()\n</js>",
+      "nextContentUrl": "<js>\n(function(){\n  var html=String(result||'');\n  var m=html.match(/\\bxlink\\s*=\\s*['\"]((?:\\\\.|[^'\"])*)['\"]/);\n  if(!m)return '';\n  var next;\n  try{next=eval('\"'+m[1]+'\"');}catch(e){next=m[1].replace(/\\\\\\//g,'/');}\n  var cur=String(baseUrl||'').replace(/[?#].*$/,'');\n  var cm=cur.match(/\\/([^\\/]+?)(?:_\\d+)?\\.html$/);\n  var nm=String(next).match(/\\/([^\\/]+?)(?:_\\d+)?\\.html$/);\n  return cm&&nm&&cm[1]===nm[1]?next:'';\n})()\n</js>"
+    },
+    "lastUpdateTime": 1788771418363
+  },
+  {
+    "bookSourceName": "从联好小说",
+    "bookSourceGroup": "社区严格实测",
+    "bookSourceType": 0,
+    "bookSourceUrl": "https://www.conglianhao.com",
+    "enabled": true,
+    "enabledExplore": false,
+    "enabledCookieJar": false,
+    "loginUrl": "",
+    "header": "{\"User-Agent\":\"Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 Chrome/136.0 Mobile Safari/537.36\"}",
+    "searchUrl": "/search/,{\"method\":\"POST\",\"body\":\"searchkey={{key}}&searchtype=all\"}",
+    "ruleSearch": {
+      "bookList": ".searchresult",
+      "name": "h3@text",
+      "author": "p.0@text",
+      "bookUrl": "a.0@href",
+      "coverUrl": "img@data-original||img@src",
+      "intro": ".searchresult_p@text"
+    },
+    "ruleBookInfo": {
+      "name": "[property=og:novel:book_name]@content",
+      "author": "[property=og:novel:author]@content",
+      "coverUrl": "[property=og:image]@content||.novel_info_main@img@src",
+      "intro": ".intro@text",
+      "kind": "[property=og:novel:category]@content",
+      "lastChapter": "[property=og:novel:lastest_chapter_name]@content"
+    },
+    "ruleToc": {
+      "chapterList": "#ul_all_chapters@li@a",
+      "chapterName": "text",
+      "chapterUrl": "href"
+    },
+    "ruleContent": {
+      "content": "#article@p@html"
+    },
+    "bookSourceComment": "2026-09-07 以《腐朽世界》（滚开）严格实测：搜索、详情、真实封面、518章目录、首章及约75%后段正文均通过。",
+    "lastUpdateTime": 1788771418364
+  },
+  {
+    "bookSourceName": "GreatlyName 小说",
+    "bookSourceGroup": "社区严格实测",
+    "bookSourceType": 0,
+    "bookSourceUrl": "https://www.greatlyname.com",
+    "enabled": true,
+    "enabledExplore": false,
+    "enabledCookieJar": false,
+    "loginUrl": "",
+    "header": "{\"User-Agent\":\"Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 Chrome/136.0 Mobile Safari/537.36\"}",
+    "searchUrl": "/search/,{\"method\":\"POST\",\"body\":\"searchkey={{key}}&searchtype=all\"}",
+    "ruleSearch": {
+      "bookList": ".searchresult",
+      "name": "h3@text",
+      "author": "p.0@text",
+      "bookUrl": "a.0@href",
+      "coverUrl": "img@data-original||img@src",
+      "intro": ".searchresult_p@text"
+    },
+    "ruleBookInfo": {
+      "name": "[property=og:novel:book_name]@content",
+      "author": "[property=og:novel:author]@content",
+      "coverUrl": "[property=og:image]@content||.novel_info_main@img@src",
+      "intro": ".intro@text",
+      "kind": "[property=og:novel:category]@content",
+      "lastChapter": "[property=og:novel:lastest_chapter_name]@content"
+    },
+    "ruleToc": {
+      "chapterList": "#ul_all_chapters@li@a",
+      "chapterName": "text",
+      "chapterUrl": "href"
+    },
+    "ruleContent": {
+      "content": "#article@p@html"
+    },
+    "bookSourceComment": "2026-09-07 以《腐朽世界》（滚开）严格实测：搜索、详情、真实封面、518章目录、首章及约75%后段正文均通过。",
+    "lastUpdateTime": 1788771418365
   }
 ]

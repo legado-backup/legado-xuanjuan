@@ -7,8 +7,15 @@
     <string name="xuanjuan_cache_unread">Unread</string>
     <string name="xuanjuan_cache_all">Full book</string>
     <string name="xuanjuan_cache_quick_hint">Choose a range, then confirm to start caching</string>
-    <string name="xuanjuan_reader_progress">Chapter %1$d / %2$d · %3$d%%</string>
+    <string name="xuanjuan_reader_progress">Chapter %1$d/%2$d · Book %3$d%%</string>
+    <string name="xuanjuan_reader_progress_with_page">Chapter %1$d/%2$d · Book %3$d%%\nPage %4$d/%5$d in chapter</string>
     <string name="xuanjuan_reader_change_source">Source</string>
+    <string name="xuanjuan_reader_recovery_title">This chapter did not load</string>
+    <string name="xuanjuan_reader_recovery_default_detail">Reload it, or switch sources to keep reading.</string>
+    <string name="xuanjuan_reader_retry">Reload</string>
+    <string name="xuanjuan_reader_use_cache">Use cached copy</string>
+    <string name="xuanjuan_reader_recovery_change_source">Switch source</string>
+    <string name="xuanjuan_reader_cache_unavailable">No usable cached copy for this chapter</string>
     <string name="xuanjuan_reader_preload_status">Preload %1$d</string>
     <string name="xuanjuan_reader_preload_off">Preload off</string>
     <string name="xuanjuan_reader_preload_title">Chapter preload</string>

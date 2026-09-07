@@ -551,6 +551,15 @@
             android:name=".service.TTSReadAloudService"
             android:foregroundServiceType="mediaPlayback" />
         <service
+            android:name=".service.OfflineReadAloudService"
+            android:foregroundServiceType="mediaPlayback" />
+        <service
+            android:name=".service.KokoroModelInstallService"
+            android:foregroundServiceType="dataSync" />
+        <service
+            android:name=".service.FastVitsModelInstallService"
+            android:foregroundServiceType="dataSync" />
+        <service
             android:name=".service.HttpReadAloudService"
             android:foregroundServiceType="mediaPlayback" />
         <service

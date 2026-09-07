@@ -1,5 +1,7 @@
 package io.legado.app.ui.book.read
 
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.io.File
@@ -45,8 +47,53 @@ class XuanjuanReaderMenuContractTest {
     fun readerProgressUsesCurrentAndTotalChapterState() {
         val menu = source("app/src/main/java/io/legado/app/ui/book/read/ReadMenu.kt")
         assertTrue(menu.contains("ReadBook.simulatedChapterSize"))
-        assertTrue(menu.contains("ReadBook.durChapterIndex + 1"))
+        assertTrue(menu.contains("ReadBook.curTextChapter?.pageSize"))
+        assertTrue(menu.contains("ReadBook.durPageIndex"))
+        assertTrue(menu.contains("resolveReaderProgress("))
         assertTrue(menu.contains("R.string.xuanjuan_reader_progress"))
+        assertTrue(menu.contains("R.string.xuanjuan_reader_progress_with_page"))
+    }
+
+    @Test
+    fun readerProgressIncludesCurrentPageFraction() {
+        val progress = resolveReaderProgress(
+            chapterIndex = 2,
+            chapterCount = 10,
+            pageIndex = 4,
+            pageCount = 10,
+        )
+        assertEquals(3, progress.currentChapter)
+        assertEquals(5, progress.currentPage)
+        assertEquals(25, progress.bookPercent)
+    }
+
+    @Test
+    fun readerProgressDoesNotInventPagesBeforeLayout() {
+        val progress = resolveReaderProgress(
+            chapterIndex = 2,
+            chapterCount = 10,
+            pageIndex = -1,
+            pageCount = 0,
+        )
+        assertNull(progress.currentPage)
+        assertNull(progress.totalPages)
+        assertEquals(20, progress.bookPercent)
+    }
+
+    @Test
+    fun secondaryQuickActionsKeepAccessibleTargetsButUseLowerVisualEmphasis() {
+        val layout = source("app/src/main/res/layout/view_read_menu.xml")
+        val menu = source("app/src/main/java/io/legado/app/ui/book/read/ReadMenu.kt")
+        val cache = layout.substringAfter("android:id=\"@+id/ll_cache\"")
+            .substringBefore("android:id=\"@+id/ll_change_source\"")
+        val sourceAction = layout.substringAfter("android:id=\"@+id/ll_change_source\"")
+            .substringBefore("<!--目录按钮-->")
+        assertTrue(cache.contains("android:layout_height=\"48dp\""))
+        assertTrue(cache.contains("android:textSize=\"12sp\""))
+        assertTrue(sourceAction.contains("android:layout_height=\"48dp\""))
+        assertTrue(sourceAction.contains("android:textSize=\"12sp\""))
+        assertTrue(menu.contains("ivCache.setColorFilter(secondaryTextColor"))
+        assertTrue(menu.contains("ivChangeSource.setColorFilter(secondaryTextColor"))
     }
 
     @Test

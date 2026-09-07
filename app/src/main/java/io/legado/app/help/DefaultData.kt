@@ -63,6 +63,9 @@ internal val NOVEL_HELPER_BUILTIN_SOURCE_URLS = listOf(
     "https://m.kudushu.org",
     "http://wap.wangshuge.la",
     "http://www.qudushu.com",
+    "https://www.bounceup.net",
+    "https://www.conglianhao.com",
+    "https://www.greatlyname.com",
 )
 
 internal val NOVEL_HELPER_UNAVAILABLE_BUILTIN_SOURCE_URLS = setOf(

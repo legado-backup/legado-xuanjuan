@@ -8,6 +8,8 @@ import android.view.ViewGroup
 import android.widget.LinearLayout
 import androidx.preference.ListPreference
 import androidx.preference.Preference
+import androidx.preference.PreferenceCategory
+import androidx.preference.PreferenceGroup
 import io.legado.app.R
 import io.legado.app.base.BasePrefDialogFragment
 import io.legado.app.constant.EventBus
@@ -16,7 +18,6 @@ import io.legado.app.help.IntentHelp
 import io.legado.app.help.config.AppConfig
 import io.legado.app.lib.prefs.SwitchPreference
 import io.legado.app.lib.prefs.fragment.PreferenceFragment
-import io.legado.app.lib.theme.backgroundColor
 import io.legado.app.lib.theme.primaryColor
 import io.legado.app.model.ReadAloud
 import io.legado.app.service.BaseReadAloudService
@@ -42,7 +43,7 @@ class ReadAloudConfigDialog : BasePrefDialogFragment() {
         savedInstanceState: Bundle?
     ): View {
         val view = LinearLayout(requireContext())
-        view.setBackgroundColor(requireContext().backgroundColor)
+        view.setBackgroundResource(R.drawable.xuanjuan_read_aloud_bg)
         view.id = R.id.tag1
         container?.addView(view)
         return view
@@ -67,6 +68,7 @@ class ReadAloudConfigDialog : BasePrefDialogFragment() {
         override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
             addPreferencesFromResource(R.xml.pref_config_aloud)
             applyXuanjuanPreferenceCards(preferenceScreen)
+            applyReadAloudPreferenceCards(preferenceScreen)
             upSpeakEngineSummary()
             findPreference<SwitchPreference>(PreferKey.pauseReadAloudWhilePhoneCalls)?.let {
                 it.isEnabled = AppConfig.ignoreAudioFocus
@@ -75,7 +77,23 @@ class ReadAloudConfigDialog : BasePrefDialogFragment() {
 
         override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
             super.onViewCreated(view, savedInstanceState)
+            listView.setBackgroundResource(R.drawable.xuanjuan_read_aloud_bg)
             listView.setEdgeEffectColor(primaryColor)
+        }
+
+        private fun applyReadAloudPreferenceCards(group: PreferenceGroup) {
+            repeat(group.preferenceCount) { index ->
+                val preference = group.getPreference(index)
+                when (preference) {
+                    is PreferenceCategory -> {
+                        preference.layoutResource = R.layout.xuanjuan_read_aloud_preference_category
+                        applyReadAloudPreferenceCards(preference)
+                    }
+
+                    is PreferenceGroup -> applyReadAloudPreferenceCards(preference)
+                    else -> preference.layoutResource = R.layout.xuanjuan_read_aloud_preference
+                }
+            }
         }
 
         override fun onResume() {

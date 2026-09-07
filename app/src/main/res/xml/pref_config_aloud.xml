@@ -5,7 +5,7 @@
     app:allowDividerBelow="false">
 
     <io.legado.app.lib.prefs.PreferenceCategory
-        android:title="@string/aloud_config"
+        android:title="@string/read_aloud_settings_playback"
         app:allowDividerAbove="false"
         app:allowDividerBelow="false"
         app:iconSpaceReserved="false">
@@ -36,6 +36,14 @@
             android:key="mediaButtonPerNext"
             app:iconSpaceReserved="false" />
 
+    </io.legado.app.lib.prefs.PreferenceCategory>
+
+    <io.legado.app.lib.prefs.PreferenceCategory
+        android:title="@string/read_aloud_settings_follow"
+        app:allowDividerAbove="false"
+        app:allowDividerBelow="false"
+        app:iconSpaceReserved="false">
+
         <io.legado.app.lib.prefs.SwitchPreference
             android:defaultValue="false"
             android:title="@string/read_aloud_by_page"
@@ -49,6 +57,14 @@
             android:summary="@string/read_aloud_follow_manual_page_summary"
             android:title="@string/read_aloud_follow_manual_page"
             app:iconSpaceReserved="false" />
+
+    </io.legado.app.lib.prefs.PreferenceCategory>
+
+    <io.legado.app.lib.prefs.PreferenceCategory
+        android:title="@string/read_aloud_settings_engine"
+        app:allowDividerAbove="false"
+        app:allowDividerBelow="false"
+        app:iconSpaceReserved="false">
 
         <io.legado.app.lib.prefs.SwitchPreference
             android:defaultValue="false"

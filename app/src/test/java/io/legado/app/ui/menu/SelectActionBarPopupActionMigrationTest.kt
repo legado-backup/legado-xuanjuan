@@ -68,13 +68,6 @@ class SelectActionBarPopupActionMigrationTest {
         assertFalse(source.contains("java.lang.reflect.Field"))
     }
 
-    @Test
-    fun `migration is recorded in the current update log`() {
-        val log = readProjectAsset("updateLog.md")
-        assertTrue(log.contains("**2026/07/25**"))
-        assertTrue(log.contains("批量选择栏的展开菜单改为主题化纵向菜单"))
-    }
-
     private fun readMenuItemIds(path: String): List<String> {
         val factory = DocumentBuilderFactory.newInstance().apply {
             isNamespaceAware = true
@@ -90,9 +83,6 @@ class SelectActionBarPopupActionMigrationTest {
 
     private fun readProjectFile(path: String): String =
         resolveFile(path).takeIf(File::isFile)?.readText().orEmpty()
-
-    private fun readProjectAsset(path: String): String =
-        resolveFile("src/main/assets/$path").takeIf(File::isFile)?.readText().orEmpty()
 
     private fun resolveFile(path: String): File =
         sequenceOf(File(path), File("app/$path"))

@@ -12,7 +12,7 @@ class ReadAloudAccessibilityTest {
             "src/main/java/io/legado/app/ui/book/read/config/ReadAloudDialog.kt"
         )
         val upPlayState = source.substringAfter("private fun upPlayState()")
-            .substringBefore("private fun upSeekTimer()")
+            .substringBefore("private fun upStopText()")
 
         val pauseLabel = upPlayState.indexOf("R.string.pause")
         val playLabel = upPlayState.indexOf("R.string.audio_play")

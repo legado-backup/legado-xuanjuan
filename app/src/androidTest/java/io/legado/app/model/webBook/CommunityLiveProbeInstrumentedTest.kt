@@ -25,6 +25,14 @@ class CommunityLiveProbeInstrumentedTest {
         val candidateAsset = arguments.getString("strictCandidateAsset")
             ?.trim()
             ?.takeIf { it.isNotBlank() }
+        val strictBookName = arguments.getString("strictBookName")
+            ?.trim()
+            ?.takeIf { it.isNotBlank() }
+            ?: "腐朽世界"
+        val strictBookAuthor = arguments.getString("strictBookAuthor")
+            ?.trim()
+            ?.takeIf { it.isNotBlank() }
+            ?: "滚开"
         val assets = if (candidateAsset == null) {
             instrumentation.targetContext.assets
         } else {
@@ -58,7 +66,7 @@ class CommunityLiveProbeInstrumentedTest {
             }
         }
         if (candidateAsset == null) {
-            assertEquals(7, allSources.size)
+            assertEquals(10, allSources.size)
         }
         val requested = arguments
             .getString("strictSource")
@@ -85,9 +93,9 @@ class CommunityLiveProbeInstrumentedTest {
             try {
                 withTimeout(75_000) {
                     println("PROBE_STAGE ${source.bookSourceName}|search")
-                    val results = WebBook.searchBookAwait(source, "腐朽世界", 1)
+                    val results = WebBook.searchBookAwait(source, strictBookName, 1)
                     val exact = results.firstOrNull {
-                        it.name.trim() == "腐朽世界" && it.author.contains("滚开")
+                        it.name.trim() == strictBookName && it.author.contains(strictBookAuthor)
                     } ?: error(
                         "exact search result missing; results=" +
                             results.take(3).map { it.name + "/" + it.author }
@@ -95,8 +103,8 @@ class CommunityLiveProbeInstrumentedTest {
                     val book = exact.toBook()
                     println("PROBE_STAGE ${source.bookSourceName}|detail")
                     WebBook.getBookInfoAwait(source, book, canReName = false)
-                    check(book.name.trim() == "腐朽世界") { "detail title=${book.name}" }
-                    check(book.author.contains("滚开")) { "detail author=${book.author}" }
+                    check(book.name.trim() == strictBookName) { "detail title=${book.name}" }
+                    check(book.author.contains(strictBookAuthor)) { "detail author=${book.author}" }
 
                     val cover = (book.coverUrl?.takeIf { it.isNotBlank() } ?: exact.coverUrl)
                         ?.substringBefore(",{")

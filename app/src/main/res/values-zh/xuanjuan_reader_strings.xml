@@ -7,8 +7,15 @@
     <string name="xuanjuan_cache_unread">全部未读</string>
     <string name="xuanjuan_cache_all">缓存全本</string>
     <string name="xuanjuan_cache_quick_hint">选择范围后，点击确定开始缓存</string>
-    <string name="xuanjuan_reader_progress">第 %1$d / %2$d 章 · %3$d%%</string>
+    <string name="xuanjuan_reader_progress">第 %1$d/%2$d 章 · 全书 %3$d%%</string>
+    <string name="xuanjuan_reader_progress_with_page">第 %1$d/%2$d 章 · 全书 %3$d%%\n本章 %4$d/%5$d 页</string>
     <string name="xuanjuan_reader_change_source">换源</string>
+    <string name="xuanjuan_reader_recovery_title">这一章暂时没加载出来</string>
+    <string name="xuanjuan_reader_recovery_default_detail">可以重新加载，或换个书源继续阅读。</string>
+    <string name="xuanjuan_reader_retry">重新加载</string>
+    <string name="xuanjuan_reader_use_cache">读取缓存</string>
+    <string name="xuanjuan_reader_recovery_change_source">换个书源</string>
+    <string name="xuanjuan_reader_cache_unavailable">这章暂时没有可用缓存</string>
     <string name="xuanjuan_reader_preload_status">预载 %1$d 章</string>
     <string name="xuanjuan_reader_preload_off">预载关闭</string>
     <string name="xuanjuan_reader_preload_title">章节预载</string>

@@ -1,19 +1,23 @@
 package io.legado.app.ui.book.read.config
 
-import android.annotation.SuppressLint
 import android.content.DialogInterface
+import android.graphics.Color
 import android.os.Bundle
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
+import android.widget.ImageView
 import android.widget.SeekBar
+import android.widget.TextView
 import androidx.appcompat.widget.TooltipCompat
 import io.legado.app.R
 import io.legado.app.base.BaseDialogFragment
 import io.legado.app.constant.EventBus
 import io.legado.app.databinding.DialogReadAloudBinding
 import io.legado.app.help.config.AppConfig
+import io.legado.app.help.tts.FastVitsOfflineTts
+import io.legado.app.help.tts.KokoroOfflineTts
 import io.legado.app.lib.theme.bottomBackground
 import io.legado.app.lib.theme.getPrimaryTextColor
 import io.legado.app.model.ReadAloud
@@ -36,7 +40,7 @@ class ReadAloudDialog : BaseDialogFragment(R.layout.dialog_read_aloud),
         super.onStart()
         dialog?.window?.run {
             clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
-            setBackgroundDrawableResource(R.color.background)
+            setBackgroundDrawableResource(R.color.transparent)
             decorView.setPadding(0, 0, 0, 0)
             val attr = attributes
             attr.dimAmount = 0.0f
@@ -57,47 +61,49 @@ class ReadAloudDialog : BaseDialogFragment(R.layout.dialog_read_aloud),
             dismiss()
             return
         }
-        val bg = requireContext().bottomBackground
-        val isLight = ColorUtils.isColorLight(bg)
-        val textColor = requireContext().getPrimaryTextColor(isLight)
-        binding.run {
-            rootView.setBackgroundColor(bg)
-            tvPre.setTextColor(textColor)
-            tvNext.setTextColor(textColor)
-            ivPlayPrev.setColorFilter(textColor)
-            ivPlayPause.setColorFilter(textColor)
-            ivPlayNext.setColorFilter(textColor)
-            ivStop.setColorFilter(textColor)
-            ivTimer.setColorFilter(textColor)
-            tvTimer.setTextColor(textColor)
-            ivTtsSpeechReduce.setColorFilter(textColor)
-            tvTtsSpeed.setTextColor(textColor)
-            tvTtsSpeedValue.setTextColor(textColor)
-            ivTtsSpeechAdd.setColorFilter(textColor)
-            ivCatalog.setColorFilter(textColor)
-            tvCatalog.setTextColor(textColor)
-            ivMainMenu.setColorFilter(textColor)
-            tvMainMenu.setTextColor(textColor)
-            ivToBackstage.setColorFilter(textColor)
-            tvToBackstage.setTextColor(textColor)
-            ivSetting.setColorFilter(textColor)
-            tvSetting.setTextColor(textColor)
-            cbTtsFollowSys.setTextColor(textColor)
-            ivEngine.setColorFilter(textColor)
-            tvEngineName.setTextColor(textColor)
-            ivEngineArrow.setColorFilter(textColor)
+        if (AppConfig.isEInkMode) {
+            val bg = requireContext().bottomBackground
+            val textColor = requireContext().getPrimaryTextColor(ColorUtils.isColorLight(bg))
+            binding.rootView.setBackgroundColor(bg)
+            listOf(
+                binding.llEngine,
+                binding.llTimer,
+                binding.llSpeedCard,
+                binding.llBackToSpeech,
+            ).forEach { it.setBackgroundColor(Color.TRANSPARENT) }
+            binding.ivPlayPause.setBackgroundColor(Color.TRANSPARENT)
+            applyEInkColors(binding.rootView, textColor)
+        } else {
+            binding.rootView.setBackgroundResource(R.drawable.xuanjuan_read_aloud_bg)
         }
         initData()
         initEvent()
     }
 
+    private fun applyEInkColors(view: View, color: Int) {
+        when (view) {
+            is TextView -> view.setTextColor(color)
+            is ImageView -> view.setColorFilter(color)
+            is ViewGroup -> for (index in 0 until view.childCount) {
+                applyEInkColors(view.getChildAt(index), color)
+            }
+        }
+    }
+
     private fun initData() = binding.run {
+        when (ReadAloud.ttsEngine) {
+            KokoroOfflineTts.ENGINE_TOKEN -> if (KokoroOfflineTts.isInstalled(requireContext())) {
+                KokoroOfflineTts.prewarm(requireContext())
+            }
+            FastVitsOfflineTts.ENGINE_TOKEN -> if (FastVitsOfflineTts.isInstalled(requireContext())) {
+                FastVitsOfflineTts.prewarm(requireContext())
+            }
+        }
         upPlayState()
         upEngineName()
         upStopText()
-        cbTtsFollowSys.isChecked = requireContext().getPrefBoolean("ttsFollowSys", true)
-        upTtsSpeechRateEnabled(!cbTtsFollowSys.isChecked)
-        upSeekTimer()
+        refreshSpeedControls()
+        upBackToSpeechVisibility()
     }
 
     private fun initEvent() = binding.run {
@@ -134,26 +140,11 @@ class ReadAloudDialog : BaseDialogFragment(R.layout.dialog_read_aloud),
         ivPlayNext.setOnClickListener { ReadAloud.nextParagraph(requireContext()) }
         llCatalog.setOnClickListener { callBack?.openChapterList() }
         llToBackstage.setOnClickListener { callBack?.finish() }
-        cbTtsFollowSys.setOnCheckedChangeListener { _, isChecked ->
-            AppConfig.ttsFlowSys = isChecked
-            upTtsSpeechRateEnabled(!isChecked)
-            upTtsSpeechRate()
+        llBackToSpeech.setOnClickListener {
+            callBack?.backToSpeakingPosition()
+            dismissAllowingStateLoss()
         }
-        ivTtsSpeechReduce.setOnClickListener {
-            seekTtsSpeechRate.progress = AppConfig.ttsSpeechRate - 1
-            AppConfig.ttsSpeechRate -= 1
-            upTtsSpeechRate()
-        }
-        ivTtsSpeechAdd.setOnClickListener {
-            seekTtsSpeechRate.progress = AppConfig.ttsSpeechRate + 1
-            AppConfig.ttsSpeechRate += 1
-            upTtsSpeechRate()
-        }
-        ivTimer.setOnClickListener {
-            AppConfig.ttsTimer = seekTimer.progress
-            toastOnUi("保存设定时间成功！")
-        }
-        tvTimer.setOnClickListener {
+        llTimer.setOnClickListener {
             showDialogFragment(
                 SleepTimerDialog.newInstance(
                     BaseReadAloudService.timeMinute,
@@ -161,8 +152,23 @@ class ReadAloudDialog : BaseDialogFragment(R.layout.dialog_read_aloud),
                 )
             )
         }
-        //设置保存的默认值
-        seekTtsSpeechRate.progress = AppConfig.ttsSpeechRate
+        cbTtsFollowSys.setOnCheckedChangeListener { _, isChecked ->
+            if (isOfflineNeuralEngine()) return@setOnCheckedChangeListener
+            AppConfig.ttsFlowSys = isChecked
+            upTtsSpeechRateEnabled(!isChecked)
+            upTtsSpeechRate()
+        }
+        ivTtsSpeechReduce.setOnClickListener {
+            setSpeechRate(activeSpeechRate() - 1)
+        }
+        ivTtsSpeechAdd.setOnClickListener {
+            setSpeechRate(activeSpeechRate() + 1)
+        }
+        tvSpeed08.setOnClickListener { setSpeechRate(3) }
+        tvSpeed10.setOnClickListener { setSpeechRate(5) }
+        tvSpeed12.setOnClickListener { setSpeechRate(7) }
+        tvSpeed15.setOnClickListener { setSpeechRate(10) }
+        tvSpeed20.setOnClickListener { setSpeechRate(15) }
         seekTtsSpeechRate.setOnSeekBarChangeListener(object : SeekBarChangeListener {
 
             override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
@@ -171,28 +177,32 @@ class ReadAloudDialog : BaseDialogFragment(R.layout.dialog_read_aloud),
             }
 
             override fun onStopTrackingTouch(seekBar: SeekBar) {
-                AppConfig.ttsSpeechRate = seekBar.progress
-                upTtsSpeechRate()
-            }
-        })
-        seekTimer.setOnSeekBarChangeListener(object : SeekBarChangeListener {
-            override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
-                if (fromUser) upTimerText(progress)
-            }
-
-            override fun onStopTrackingTouch(seekBar: SeekBar) {
-                ReadAloud.setTimer(requireContext(), seekTimer.progress)
+                setSpeechRate(seekBar.progress)
             }
         })
     }
 
     private fun upTtsSpeechRateEnabled(enabled: Boolean) {
         binding.run {
-            upTtsSpeechRateText(AppConfig.ttsSpeechRate)
-            tvTtsSpeedValue.visible(enabled)
+            upTtsSpeechRateText(activeSpeechRate())
             seekTtsSpeechRate.isEnabled = enabled
             ivTtsSpeechReduce.isEnabled = enabled
             ivTtsSpeechAdd.isEnabled = enabled
+            val alpha = if (enabled) 1f else 0.38f
+            listOf(
+                tvTtsSpeedValue,
+                seekTtsSpeechRate,
+                ivTtsSpeechReduce,
+                ivTtsSpeechAdd,
+                tvSpeed08,
+                tvSpeed10,
+                tvSpeed12,
+                tvSpeed15,
+                tvSpeed20,
+            ).forEach {
+                it.isEnabled = enabled
+                it.alpha = alpha
+            }
         }
     }
 
@@ -208,49 +218,80 @@ class ReadAloudDialog : BaseDialogFragment(R.layout.dialog_read_aloud),
             binding.ivPlayPause,
             binding.ivPlayPause.contentDescription,
         )
-        val bg = requireContext().bottomBackground
-        val isLight = ColorUtils.isColorLight(bg)
-        val textColor = requireContext().getPrimaryTextColor(isLight)
-        binding.ivPlayPause.setColorFilter(textColor)
-    }
-
-    private fun upSeekTimer() {
-        binding.seekTimer.post {
-            binding.seekTimer.progress = when {
-                BaseReadAloudService.timeMinute > 0 -> BaseReadAloudService.timeMinute
-                BaseReadAloudService.chapterToStop > 0 -> 0
-                else -> AppConfig.ttsTimer
-            }
-        }
+        upBackToSpeechVisibility()
     }
 
     private fun upStopText() {
         binding.tvTimer.text = when {
             BaseReadAloudService.chapterToStop > 0 -> getString(
-                R.string.sleep_timer_chapters,
+                R.string.read_aloud_timer_status_chapter,
                 BaseReadAloudService.chapterToStop,
             )
 
             BaseReadAloudService.timeMinute > 0 -> getString(
-                R.string.timer_m,
+                R.string.sleep_timer_status_time,
                 BaseReadAloudService.timeMinute,
             )
 
-            else -> getString(R.string.set_timer)
+            else -> getString(R.string.sleep_timer_status_none)
         }
     }
 
-    private fun upTimerText(timeMinute: Int) {
-        if (timeMinute < 0) {
-            binding.tvTimer.text = requireContext().getString(R.string.timer_m, 0)
-        } else {
-            binding.tvTimer.text = requireContext().getString(R.string.timer_m, timeMinute)
-        }
-    }
-
-    @SuppressLint("SetTextI18n")
     private fun upTtsSpeechRateText(value: Int) {
-        binding.tvTtsSpeedValue.text = ((value + 5) / 10f).toString()
+        val safeValue = value.coerceIn(AppConfig.minTtsSpeechRate, AppConfig.maxTtsSpeechRate)
+        binding.tvTtsSpeedValue.text = getString(
+            R.string.tts_speed_value,
+            (safeValue + 5) / 10f,
+        )
+        binding.tvSpeed08.isSelected = safeValue == 3
+        binding.tvSpeed10.isSelected = safeValue == 5
+        binding.tvSpeed12.isSelected = safeValue == 7
+        binding.tvSpeed15.isSelected = safeValue == 10
+        binding.tvSpeed20.isSelected = safeValue == 15
+        binding.tvSpeed15.text = getString(
+            if (isOfflineNeuralEngine()) R.string.tts_speed_15x_recommended else R.string.tts_speed_15x
+        )
+    }
+
+    private fun setSpeechRate(value: Int) {
+        val safeValue = value.coerceIn(AppConfig.minTtsSpeechRate, AppConfig.maxTtsSpeechRate)
+        if (isOfflineNeuralEngine()) {
+            AppConfig.kokoroSpeechRate = safeValue
+        } else {
+            AppConfig.ttsSpeechRate = safeValue
+        }
+        if (binding.seekTtsSpeechRate.progress != safeValue) {
+            binding.seekTtsSpeechRate.progress = safeValue
+        }
+        upTtsSpeechRateText(safeValue)
+        upTtsSpeechRate()
+    }
+
+    private fun activeSpeechRate(): Int =
+        if (isOfflineNeuralEngine()) AppConfig.kokoroSpeechRate else AppConfig.ttsSpeechRate
+
+    private fun isOfflineNeuralEngine(): Boolean =
+        ReadAloud.ttsEngine == KokoroOfflineTts.ENGINE_TOKEN ||
+            ReadAloud.ttsEngine == FastVitsOfflineTts.ENGINE_TOKEN
+
+    private fun refreshSpeedControls() = binding.run {
+        val offlineNeural = isOfflineNeuralEngine()
+        cbTtsFollowSys.visible(!offlineNeural)
+        if (!offlineNeural) {
+            cbTtsFollowSys.isChecked = requireContext().getPrefBoolean("ttsFollowSys", true)
+        }
+        val rate = activeSpeechRate()
+        if (seekTtsSpeechRate.progress != rate) {
+            seekTtsSpeechRate.progress = rate
+        }
+        upTtsSpeechRateText(rate)
+        upTtsSpeechRateEnabled(offlineNeural || !cbTtsFollowSys.isChecked)
+    }
+
+    private fun upBackToSpeechVisibility() {
+        binding.llBackToSpeech.visible(
+            BaseReadAloudService.isRun && !ReadAloud.followReadAloudPosition
+        )
     }
 
     private fun upTtsSpeechRate() {
@@ -267,8 +308,34 @@ class ReadAloudDialog : BaseDialogFragment(R.layout.dialog_read_aloud),
         binding.llEngine.contentDescription = "${getString(R.string.speak_engine)}: $engineName"
     }
 
+    private fun upOfflineStartupStatus(status: Int, engineToken: String) {
+        if (ReadAloud.ttsEngine != engineToken) return
+        val statusText = when (engineToken) {
+            FastVitsOfflineTts.ENGINE_TOKEN -> when (status) {
+                FastVitsOfflineTts.PLAYBACK_STATUS_LOADING_MODEL ->
+                    getString(R.string.fast_vits_playback_loading_model)
+                FastVitsOfflineTts.PLAYBACK_STATUS_FIRST_AUDIO ->
+                    getString(R.string.fast_vits_playback_first_audio)
+                else -> null
+            }
+            else -> when (status) {
+                KokoroOfflineTts.PLAYBACK_STATUS_LOADING_MODEL ->
+                    getString(R.string.kokoro_playback_loading_model)
+                KokoroOfflineTts.PLAYBACK_STATUS_FIRST_AUDIO ->
+                    getString(R.string.kokoro_playback_first_audio)
+                else -> null
+            }
+        } ?: run {
+            upEngineName()
+            return
+        }
+        binding.tvEngineName.text = statusText
+        binding.llEngine.contentDescription = "${getString(R.string.speak_engine)}: $statusText"
+    }
+
     override fun upSpeakEngineSummary() {
         upEngineName()
+        refreshSpeedControls()
     }
 
     override fun onSleepTimerMinute(minute: Int) {
@@ -280,14 +347,22 @@ class ReadAloudDialog : BaseDialogFragment(R.layout.dialog_read_aloud),
     }
 
     override fun observeLiveBus() {
-        observeEvent<Int>(EventBus.ALOUD_STATE) { upPlayState() }
+        observeEvent<Int>(EventBus.ALOUD_STATE) {
+            upPlayState()
+            upBackToSpeechVisibility()
+        }
         observeEvent<Int>(EventBus.READ_ALOUD_DS) {
-            binding.seekTimer.progress = it
             upStopText()
         }
         observeEvent<Int>(EventBus.READ_ALOUD_CHAPTER_STOP) {
-            if (it > 0) binding.seekTimer.progress = 0
             upStopText()
+        }
+        observeEvent<Boolean>(EventBus.READ_ALOUD_FOLLOW) { upBackToSpeechVisibility() }
+        observeEvent<Int>(KokoroOfflineTts.PLAYBACK_STATUS_EVENT) {
+            upOfflineStartupStatus(it, KokoroOfflineTts.ENGINE_TOKEN)
+        }
+        observeEvent<Int>(FastVitsOfflineTts.PLAYBACK_STATUS_EVENT) {
+            upOfflineStartupStatus(it, FastVitsOfflineTts.ENGINE_TOKEN)
         }
     }
 

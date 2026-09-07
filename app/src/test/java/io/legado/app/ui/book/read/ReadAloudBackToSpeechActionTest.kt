@@ -1,6 +1,5 @@
 package io.legado.app.ui.book.read
 
-import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.io.File
@@ -8,21 +7,24 @@ import java.io.File
 class ReadAloudBackToSpeechActionTest {
 
     @Test
-    fun `floating bar owns back to speaking position control`() {
+    fun `floating bar and console reuse back to speaking position control`() {
         val floatingBar = readProjectFile("src/main/res/layout/view_read_aloud_float_bar.xml")
         val dialog = readProjectFile("src/main/res/layout/dialog_read_aloud.xml")
 
         assertTrue(floatingBar.contains("@+id/ll_back_to_speech"))
         assertTrue(floatingBar.contains("@string/back_to_speaking_position"))
-        assertFalse(dialog.contains("@+id/iv_back_to_speech"))
+        assertTrue(dialog.contains("@+id/ll_back_to_speech"))
+        assertTrue(dialog.contains("@string/back_to_speaking_position"))
     }
 
     @Test
-    fun `read aloud dialog does not bind a duplicate back action`() {
+    fun `read aloud console binds back action only when speech follow is detached`() {
         val dialogKt = readProjectFile("src/main/java/io/legado/app/ui/book/read/config/ReadAloudDialog.kt")
 
-        assertFalse(dialogKt.contains("ivBackToSpeech"))
-        assertFalse(dialogKt.contains("callBack?.backToSpeakingPosition()"))
+        assertTrue(dialogKt.contains("llBackToSpeech.setOnClickListener"))
+        assertTrue(dialogKt.contains("callBack?.backToSpeakingPosition()"))
+        assertTrue(dialogKt.contains("BaseReadAloudService.isRun && !ReadAloud.followReadAloudPosition"))
+        assertTrue(dialogKt.contains("EventBus.READ_ALOUD_FOLLOW"))
     }
 
     @Test

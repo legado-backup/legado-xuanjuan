@@ -510,7 +510,9 @@ data class Book(
         var playSpeed: Float = 1.0f,     //音频播放速度
         var useGlobalAudioSkip: Boolean = false,
         // 阅读页手动选择的替换规则；旧书籍配置缺失时保持空集合。
-        var manualReplaceRuleIds: List<Long> = emptyList()
+        var manualReplaceRuleIds: List<Long> = emptyList(),
+        // 玄卷离线听书：本书人物名 -> Kokoro speaker id。保存在 readConfig，无需数据库迁移。
+        var kokoroCharacterVoices: Map<String, Int> = emptyMap(),
     ) : Parcelable
 
     class Converters {

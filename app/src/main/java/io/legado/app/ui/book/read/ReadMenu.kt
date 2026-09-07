@@ -63,6 +63,46 @@ import splitties.views.onLongClick
 import androidx.core.graphics.toColorInt
 import io.legado.app.constant.BookType
 import io.legado.app.utils.buildMainHandler
+import kotlin.math.roundToInt
+
+internal data class ReaderProgressUi(
+    val currentChapter: Int,
+    val totalChapters: Int,
+    val currentPage: Int?,
+    val totalPages: Int?,
+    val bookPercent: Int,
+)
+
+internal fun resolveReaderProgress(
+    chapterIndex: Int,
+    chapterCount: Int,
+    pageIndex: Int,
+    pageCount: Int,
+): ReaderProgressUi {
+    val totalChapters = chapterCount.coerceAtLeast(1)
+    val safeChapterIndex = chapterIndex.coerceIn(0, totalChapters - 1)
+    val hasPageProgress = pageCount > 0 && pageIndex >= 0
+    val safePageIndex = if (hasPageProgress) {
+        pageIndex.coerceIn(0, pageCount - 1)
+    } else {
+        0
+    }
+    val chapterFraction = if (hasPageProgress) {
+        (safePageIndex + 1).toFloat() / pageCount
+    } else {
+        0f
+    }
+    val bookPercent = ((safeChapterIndex + chapterFraction) * 100f / totalChapters)
+        .roundToInt()
+        .coerceIn(0, 100)
+    return ReaderProgressUi(
+        currentChapter = safeChapterIndex + 1,
+        totalChapters = totalChapters,
+        currentPage = if (hasPageProgress) safePageIndex + 1 else null,
+        totalPages = pageCount.takeIf { hasPageProgress },
+        bookPercent = bookPercent,
+    )
+}
 
 /**
  * 阅读界面菜单
@@ -223,11 +263,11 @@ class ReadMenu @JvmOverloads constructor(
         tvSetting.setTextColor(textColor)
         val quickActionColor = accentTextColor
         ivBookmark.setColorFilter(quickActionColor, PorterDuff.Mode.SRC_IN)
-        ivCache.setColorFilter(quickActionColor, PorterDuff.Mode.SRC_IN)
-        ivChangeSource.setColorFilter(quickActionColor, PorterDuff.Mode.SRC_IN)
+        ivCache.setColorFilter(secondaryTextColor, PorterDuff.Mode.SRC_IN)
+        ivChangeSource.setColorFilter(secondaryTextColor, PorterDuff.Mode.SRC_IN)
         tvBookmark.setTextColor(textColor)
-        tvCache.setTextColor(textColor)
-        tvChangeSource.setTextColor(textColor)
+        tvCache.setTextColor(secondaryTextColor)
+        tvChangeSource.setTextColor(secondaryTextColor)
         vwBrightnessPosAdjust.setColorFilter(textColor, PorterDuff.Mode.SRC_IN)
         seekBrightness.applyTint(context.accentColor)
         llBrightness.setOnClickListener(null)
@@ -725,15 +765,33 @@ class ReadMenu @JvmOverloads constructor(
                     }
                 }
             }
-            val totalChapter = ReadBook.simulatedChapterSize.coerceAtLeast(1)
-            val currentChapter = (ReadBook.durChapterIndex + 1).coerceIn(1, totalChapter)
-            val percent = (currentChapter * 100f / totalChapter).toInt().coerceIn(0, 100)
-            tvReadProgress.text = context.getString(
-                R.string.xuanjuan_reader_progress,
-                currentChapter,
-                totalChapter,
-                percent,
+            val pageCount = ReadBook.curTextChapter?.pageSize ?: 0
+            val pageIndex = if (pageCount > 0) ReadBook.durPageIndex else -1
+            val readProgress = resolveReaderProgress(
+                chapterIndex = ReadBook.durChapterIndex,
+                chapterCount = ReadBook.simulatedChapterSize,
+                pageIndex = pageIndex,
+                pageCount = pageCount,
             )
+            tvReadProgress.text = if (
+                readProgress.currentPage != null && readProgress.totalPages != null
+            ) {
+                context.getString(
+                    R.string.xuanjuan_reader_progress_with_page,
+                    readProgress.currentChapter,
+                    readProgress.totalChapters,
+                    readProgress.bookPercent,
+                    readProgress.currentPage,
+                    readProgress.totalPages,
+                )
+            } else {
+                context.getString(
+                    R.string.xuanjuan_reader_progress,
+                    readProgress.currentChapter,
+                    readProgress.totalChapters,
+                    readProgress.bookPercent,
+                )
+            }
             upPreloadState()
         }
     }
