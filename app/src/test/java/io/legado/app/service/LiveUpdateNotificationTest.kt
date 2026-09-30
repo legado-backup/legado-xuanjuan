@@ -119,7 +119,7 @@ class LiveUpdateNotificationTest {
         assertTrue(settings.contains("promotedNotificationSettingsIntent().resolveActivity"))
         assertTrue(settings.contains("intent.resolveActivity(requireContext().packageManager)"))
         assertTrue(settings.contains("putPrefBoolean(PreferKey.liveUpdateNotifications, false)"))
-        assertTrue(updateDialog.contains("isAppUpdate = true"))
+        assertFalse(updateDialog.contains("isAppUpdate = true"))
     }
 
     @Test

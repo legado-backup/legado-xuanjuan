@@ -1938,4 +1938,5 @@
     <string name="kokoro_character_saved">Character voices saved for this book</string>
     <string name="kokoro_character_preview_quote">Chapter line: “%1$s”</string>
     <string name="kokoro_character_preview_text">The road ahead is still long. Let’s keep going.</string>
+    <string name="go_to_download">去下载</string>
 </resources>

@@ -43,66 +43,22 @@ class UpdateDialogLifecycleTest {
     }
 
     @Test
-    fun `update dialog keeps beta browser and formal download actions distinct`() {
+    fun `update dialog opens github releases in browser instead of downloading in app`() {
         val source = projectFile(
             "src/main/java/io/legado/app/ui/about/UpdateDialog.kt"
         ).readText()
 
-        assertTrue(source.contains("putBoolean(\"isBeta\", updateInfo.isBeta)"))
         assertTrue(source.contains("binding.betaActions.isVisible = true"))
-        assertTrue(source.contains("setLayout(0.9f, 0.8f)"))
-        assertTrue(source.contains("if (isBetaUpdate) R.string.beta_update_now else R.string.action_download"))
-        assertTrue(source.contains("url?.takeIf(String::isNotBlank)?.let { requireContext().openUrl(it) }"))
-        assertTrue(source.contains("startDownload(url)"))
-    }
-
-    @Test
-    fun `formal update hides only the primary toolbar download action`() {
-        val source = projectFile(
-            "src/main/java/io/legado/app/ui/about/UpdateDialog.kt"
-        ).readText()
-
-        assertTrue(source.contains("binding.toolBar.menu.findItem(R.id.menu_download).isVisible = false"))
-        assertTrue(source.contains("R.id.menu_download_backup).isVisible"))
-        assertTrue(source.contains("R.id.menu_download_mirror).isVisible"))
-        assertTrue(source.contains("R.id.menu_download_alternate_mirror).isVisible"))
-    }
-
-    @Test
-    fun `formal update dialog exposes the backup cdn separately from github`() {
-        val source = projectFile(
-            "src/main/java/io/legado/app/ui/about/UpdateDialog.kt"
-        ).readText()
-
-        assertTrue(source.contains("putString(\"mirrorUrl\", updateInfo.mirrorDownloadUrl)"))
+        assertTrue(source.contains("binding.btnBetaUpdate.setText(R.string.go_to_download)"))
+        assertTrue(source.contains("requireContext().openUrl(GITHUB_RELEASES_URL)"))
         assertTrue(
             source.contains(
-                "putString(\"alternateMirrorUrl\", updateInfo.alternateMirrorDownloadUrl)"
+                "private const val GITHUB_RELEASES_URL = \"https://github.com/24257/novel-helper/releases\""
             )
         )
-        assertTrue(source.contains("R.id.menu_download_mirror).isVisible"))
-        assertTrue(
-            source.contains(
-                "R.id.menu_download_mirror -> startDownload(arguments?.getString(\"mirrorUrl\"))"
-            )
-        )
-        assertTrue(source.contains("R.id.menu_download_alternate_mirror).isVisible"))
-        assertTrue(
-            source.contains(
-                "R.id.menu_download_alternate_mirror ->"
-            ) && source.contains("startDownload(arguments?.getString(\"alternateMirrorUrl\"))")
-        )
-        assertTrue(source.contains("R.id.menu_download_backup -> startDownload"))
-        assertTrue(
-            projectFile("src/main/res/menu/app_update.xml")
-                .readText()
-                .contains("android:id=\"@+id/menu_download_mirror\"")
-        )
-        assertTrue(
-            projectFile("src/main/res/menu/app_update.xml")
-                .readText()
-                .contains("android:id=\"@+id/menu_download_alternate_mirror\"")
-        )
+        assertFalse(source.contains("startDownload("))
+        assertFalse(source.contains("Download.start("))
+        assertFalse(source.contains("inflateMenu(R.menu.app_update)"))
     }
 
     @Test

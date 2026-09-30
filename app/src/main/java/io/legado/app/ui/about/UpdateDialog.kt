@@ -7,10 +7,8 @@ import androidx.core.view.isVisible
 import io.legado.app.R
 import io.legado.app.base.BaseDialogFragment
 import io.legado.app.databinding.DialogUpdateBinding
-import io.legado.app.help.config.LocalConfig
 import io.legado.app.help.update.AppUpdate
 import io.legado.app.lib.theme.primaryColor
-import io.legado.app.model.Download
 import io.legado.app.utils.ConvertUtils
 import io.legado.app.utils.openUrl
 import io.legado.app.utils.setLayout
@@ -78,49 +76,12 @@ class UpdateDialog() : BaseDialogFragment(R.layout.dialog_update) {
             weight = 1f
         }
         binding.btnBetaCancel.setOnClickListener { dismiss() }
-        binding.btnBetaUpdate.setText(
-            if (isBetaUpdate) R.string.beta_update_now else R.string.action_download
-        )
+        binding.btnBetaUpdate.setText(R.string.go_to_download)
         binding.btnBetaUpdate.setOnClickListener {
-            val url = arguments?.getString("url")
-            if (isBetaUpdate) {
-                url?.takeIf(String::isNotBlank)?.let { requireContext().openUrl(it) }
-                dismiss()
-            } else {
-                startDownload(url)
-            }
-        }
-        if (!isBetaUpdate) {
-            binding.toolBar.inflateMenu(R.menu.app_update)
-            binding.toolBar.menu.findItem(R.id.menu_download).isVisible = false
-            binding.toolBar.menu.findItem(R.id.menu_download_backup).isVisible =
-                !arguments?.getString("backupUrl").isNullOrBlank()
-            binding.toolBar.menu.findItem(R.id.menu_download_mirror).isVisible =
-                !arguments?.getString("mirrorUrl").isNullOrBlank()
-            binding.toolBar.menu.findItem(R.id.menu_download_alternate_mirror).isVisible =
-                !arguments?.getString("alternateMirrorUrl").isNullOrBlank()
-            binding.toolBar.setOnMenuItemClickListener {
-                when (it.itemId) {
-                    R.id.menu_download -> startDownload(arguments?.getString("url"))
-                    R.id.menu_download_backup -> startDownload(arguments?.getString("backupUrl"))
-                    R.id.menu_download_mirror -> startDownload(arguments?.getString("mirrorUrl"))
-                    R.id.menu_download_alternate_mirror ->
-                        startDownload(arguments?.getString("alternateMirrorUrl"))
-                    R.id.menu_open_in_browser -> arguments?.getString("backupUrl").orEmpty()
-                        .ifBlank { arguments?.getString("url").orEmpty() }
-                        .takeIf(String::isNotBlank)
-                        ?.let { url -> requireContext().openUrl(url) }
-                    R.id.menu_ignore_version -> {
-                        LocalConfig.ignoreUpdateVersion = arguments?.getString("newVersion")
-                        toastOnUi(R.string.ignore_this_version)
-                        dismiss()
-                    }
-                }
-                return@setOnMenuItemClickListener true
-            }
+            requireContext().openUrl(GITHUB_RELEASES_URL)
+            dismiss()
         }
     }
-
     private fun formatUpdateMetadata(size: Long, createdAt: Long): String {
         val metadata = mutableListOf<String>()
         if (size > 0) metadata += ConvertUtils.formatFileSize(size)
@@ -132,12 +93,7 @@ class UpdateDialog() : BaseDialogFragment(R.layout.dialog_update) {
         return metadata.joinToString(" · ")
     }
 
-    private fun startDownload(url: String?) {
-        val name = arguments?.getString("name")
-        if (url.isNullOrBlank() || name.isNullOrBlank()) return
-        Download.start(requireContext(), url, name, isAppUpdate = true)
-        toastOnUi(R.string.download_start)
-        dismiss()
+    companion object {
+        private const val GITHUB_RELEASES_URL = "https://github.com/24257/novel-helper/releases"
     }
-
 }

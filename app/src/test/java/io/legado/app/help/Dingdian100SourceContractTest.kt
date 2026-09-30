@@ -16,8 +16,8 @@ class Dingdian100SourceContractTest {
         val getChapters = source.substringAfter("function getChapters(book)")
             .substringBefore("function getContent")
 
-        assertTrue(getChapters.contains("div.border ul.info"))
-        assertTrue(getChapters.contains("ul.info a[href*="))
+        assertTrue(getChapters.contains("a[href*=\"/chapter/"))
+        assertTrue(getChapters.contains("new RegExp(\"/chapter/\"+bid+"))
         assertFalse(getChapters.contains("#all_chapter"))
         assertFalse(getChapters.contains(", a[href*="))
     }
